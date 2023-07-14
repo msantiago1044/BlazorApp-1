@@ -1,9 +1,12 @@
 ﻿@page "/product"
 @inject IProductService productService;
+@inject NavigationManager NavigationManager
 
 <PageTitle>Products</PageTitle>
 
 <h3>Products</h3>
+
+<button class="btn btn-danger" @onclick="@(()=> NavigationManager.NavigateTo("/addproduct"))">Add Product</button>
 
 @if(products?.Count > 0)
 {
