@@ -1,65 +1,64 @@
-﻿using BlazorApp_1.Models;
+﻿using BlazorApp_1;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace BlazorApp_1.Services
+namespace BlazorApp_1;
+public class CategoryService : ICategoryService
 {
-    public class CategoryService : ICategoryService
+    private readonly HttpClient client;
+
+    private readonly JsonSerializerOptions options;
+
+    public CategoryService(HttpClient httpClient)
     {
-        private readonly HttpClient client;
+        this.client = httpClient;
+        options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+    }
+    public async Task<List<Category>?> Get()
+    {
+        var response = await client.GetAsync("v1/categories");
+        var content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new ApplicationException(content);
+        }
+        return JsonSerializer.Deserialize<List<Category>>(content, options);
 
-        private readonly JsonSerializerOptions options;
-
-        public CategoryService(HttpClient httpClient)
+    }
+    public async Task Add(Category category)
+    {
+        var response = await client.PostAsync("v1/categories", JsonContent.Create(category));
+        var content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
         {
-            this.client = httpClient;
-            options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        }
-        public async Task<List<Category>?> Get()
-        {
-            var response = await client.GetAsync("/v1/Categories");
-            var content = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new ApplicationException(content);
-            }
-            return JsonSerializer.Deserialize<List<Category>>(content, options);
-
-        }
-        public async Task Add(Category category)
-        {
-            var response = await client.PostAsync("/categories", JsonContent.Create(category));
-            var content = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new ApplicationException(content);
-            }
-        }
-        public async Task Update(int categoryId, Category category)
-        {
-            var response = await client.PutAsync("/categories/{categoryId}", JsonContent.Create(category));
-            var content = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new ApplicationException(content);
-            }
-        }
-        public async Task Delete(int categoryId)
-        {
-            var response = await client.DeleteAsync("/categories/{categoryId}");
-            var content = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new ApplicationException(content);
-            }
-        }
-        public async Task<List<Product>?> Pag(int categoryID)
-        {
-            var response = await client.GetAsync("categories/{categoryID}/products");
-            return await JsonSerializer.DeserializeAsync<List<Product>>(await response.Content.ReadAsStreamAsync());
+            throw new ApplicationException(content);
         }
     }
+    public async Task Update(int categoryId, Category category)
+    {
+        var response = await client.PutAsync($"v1/categories/{categoryId}", JsonContent.Create(category));
+        var content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new ApplicationException(content);
+        }
+    }
+    public async Task Delete(int categoryId)
+    {
+        var response = await client.DeleteAsync($"v1/categories/{categoryId}");
+        var content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new ApplicationException(content);
+        }
+    }
+    public async Task<List<Product>?> Pag(int categoryID)
+    {
+        var response = await client.GetAsync($"v1/categories/{categoryID}/products");
+        return await JsonSerializer.DeserializeAsync<List<Product>>(await response.Content.ReadAsStreamAsync());
+    }
 }
+
 public interface ICategoryService
 {
     Task<List<Category>?> Get();
