@@ -33,7 +33,7 @@ else
 		products = await GetProducts();
 	}
 
-	private async Task<List<Product>> GetProducts()
+	private async Task<List<Product>?> GetProducts()
 	{
 		return await productService.Get();
 	}
